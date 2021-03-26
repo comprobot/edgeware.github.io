@@ -1,0 +1,177 @@
+<html>
+  <head>
+    <title>Edgeware Wallet Management</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"/>
+    <link rel="stylesheet" href="style.css" type="text/css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css" type="text/css">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
+    <script src="code.js"></script>
+	<script src="index.js"></script>
+	<script type="text/javascript">
+        var accounts = [];		
+		var edgewareAccounts= '';
+		
+		
+		function refresh() {
+            	
+				document.getElementById("content").innerHTML="";
+				
+				
+				for (i=0; i<accounts.length; i++)
+				{
+				
+				  document.getElementById("content").innerHTML += "<div id='contentDIV"+i+"'></div>";				  
+				  document.getElementById("contentDIV"+i).innerHTML += "<hr style='border: 3px solid black;' /><p align='left'>"+accounts[i].meta["name"]+"</p>";
+				  document.getElementById("contentDIV"+i).innerHTML += "<p align='left'>Substrate address: </p>";
+				  document.getElementById("contentDIV"+i).innerHTML += "<p align='left'><div align='left' id='div"+"contentDIV"+i+"'>"+accounts[i].address+"</div></p>";
+				  returnEdgewareAddressContent(accounts[i].address,"contentDIV"+i);
+				}
+				document.getElementById("FromAddress").value = accounts[0].address;
+            
+        }
+		
+		
+        function login() {
+            window.EdgewareWeb3JS.loginEdgeware().then(res => {
+		        accounts = res;
+				document.getElementById("content").innerHTML="";
+				for (i=0; i<accounts.length; i++)
+				{
+				
+				  document.getElementById("content").innerHTML += "<div id='contentDIV"+i+"'></div>";				  
+				  document.getElementById("contentDIV"+i).innerHTML += "<hr style='border: 3px solid black;' /><p align='left'>"+accounts[i].meta["name"]+"</p>";
+				  document.getElementById("contentDIV"+i).innerHTML += "<p align='left'>Substrate address: </p>";
+				  document.getElementById("contentDIV"+i).innerHTML += "<p align='left'><div align='left' id='div"+"contentDIV"+i+"'>"+accounts[i].address+"</div></p>";
+				  
+				  
+				  returnEdgewareAddressContent(accounts[i].address,"contentDIV"+i);
+				  
+				
+				}
+				
+				
+				document.getElementById("FromAddress").value = accounts[0].address;
+            }).catch(e => {
+                //console.log(e);
+                alert("Please close window and click the button of plugin");
+            })
+        }
+		
+		
+		function returnEdgewareAddressContent(from,div) {
+            window.EdgewareWeb3JS.returnEdgewareAddress(from).then(res => {			   
+                
+                newaddress = res;
+				edgewareAccounts = res;
+				
+				document.getElementById(div).innerHTML += "<p align='left'>Edgeware address: </p>";
+                document.getElementById(div).innerHTML += "<p align='left'><div align='left' id='div"+div+"'> <a target=\'_blank\' href=\'https://edgeware.subscan.io/account/"+res+"\' >"+res+"</a></div></p>";
+				getBalanceContent(newaddress,div);
+				
+            }).catch(e => {
+                //console.log(e);
+                alert(e);
+            })
+        }
+		
+				
+		function returnEdgewareAddressFrom(from) {
+            window.EdgewareWeb3JS.returnEdgewareAddress(from).then(res => {			    
+                newaddress = res;
+				edgewareAccounts = res;				
+                document.getElementById("FromAddress").value = newaddress;				
+				
+            }).catch(e => {                
+                alert(e);
+            })
+        }
+		
+		
+		
+		
+		
+		
+		
+		function returnEdgewareAddress(from) {
+            window.EdgewareWeb3JS.returnEdgewareAddress(from).then(res => {			    
+                newaddress = res;
+				edgewareAccounts = res;
+                document.getElementById("decodeDiv").innerHTML = newaddress;
+				getBalance(newaddress);
+				
+            }).catch(e => {
+                //console.log(e);
+                alert(e);
+            })
+        }
+		
+		
+		function getBalanceContent(from,div) {	
+		    
+            window.EdgewareWeb3JS.getBalance(from).then(res => {				
+                newaddress = res;								
+				document.getElementById(div).innerHTML += "<p align='left'><div align='left' id='balance"+from+"'>Balance: "+res+"</div></p>";								
+				
+            }).catch(e => {
+                //console.log(e);
+                alert(e);
+            })
+        }
+		
+		
+		
+		function transferTo(from,to,amount) {
+		    if (!accounts || !accounts.length) {
+                alert("Please login first");
+                return;
+            }
+			
+			window.EdgewareWeb3JS.transfer(from, to, amount)									
+                .then((hash) => {								
+					document.getElementById("transferfrom").innerHTML = "<p align='left'>Transfer request is submited</p>";					
+					window.setTimeout(refresh(), 3000);
+					
+                })
+                .catch(e => {
+					alert(e);
+                });
+        }
+    </script>	
+  
+  </head>
+  <!--
+  position: absolute; left: 50%;
+  -->
+  <body>
+  
+     <script>
+	 login();
+	</script>
+  
+    <div id="intro" class="window selectedwindow" style="top: 0; bottom: 0; left: 0;  right: 0; margin: auto auto;  position: absolute; width: 650px; height: 700px; z-index: 1">
+      <div class="windowheader">
+        <div class="windowclose"></div>
+        <div class="windowtitle">Edgeware Account Management</div>
+      </div>
+      <div class="windowinner">
+        <div class="fullwindowhtml">
+        <hr style='border: 5px solid black;' /> <p align='left'>Transfer EDG  <br/> <br/> From :<input type='text' id='FromAddress' name='FromAddress' value=''  maxlength='60' size='60' ><br/>(*Please use Substrate address) </p>		
+		<p align='left'>To :<input type='text' id='toAddress' name='toAddress' value=''  maxlength='60' size='60' > </p>
+		<p align='left'>Amount: <input type='text' name='amount' id='amount' value='0'  maxlength='20' size='20' > </p><br/> 
+		<button type='submit' class='btn btn-outline-light' onclick='transferTo(document.getElementById("FromAddress").value,document.getElementById("toAddress").value,document.getElementById("amount").value)'>Send</button><hr style='border: 5px solid black;' /><br/>		
+		<div align='left' id='transferfrom'></div>
+		<p>Account detail: <button type='button' class='btn btn-outline-light' onclick='refresh()'>Refresh</button></p>
+		<div id="content">
+		
+		
+		</div>
+		
+        </div>
+      </div>
+    </div>
+	
+  </body>
+</html>
