@@ -56,9 +56,9 @@
 				
 				
 				document.getElementById("FromAddress").value = accounts[0].address;
-            }).catch(e => {
-                console.log(e);
-                alert("Please close window and click the button of plugin");
+            }).catch(e => {                
+		alert("Cannot detect plugin");
+                alert("Please close browser and click the button of plugin on extenaion again");
             })
 			
 			
